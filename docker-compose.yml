@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    network_mode: host
+    environment:
+      - PLEX_CLAIM=claim-<your-plex-claim-token>
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config/plex:/config
+      - ./transcode:/transcode
+      - ./media:/data
+      - ./downloads/shows:/shows
+      - ./downloads/movies:/movies
+    ports:
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1900:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
+    restart: unless-stopped
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - TRANSMISSION_WEB_HOME= #optional
+      - USER=transmission_user
+      - PASS=transmission_password
+      - WHITELIST= #optional
+      - PEERPORT= #optional
+      - HOST_WHITELIST=*
+    volumes:
+      - ./config/transmission:/config
+      - ./downloads:/downloads
+      - ./watch:/watch
+      - ./downloads/movies:/movies
+      - ./downloads/shows:/shows
+
+    ports:
+      - "9091:9091"
+      - "51413:51413"
+      - "51413:51413/udp"
+    restart: unless-stopped
