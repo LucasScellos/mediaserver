@@ -1,31 +1,35 @@
+# All media lives under DATA_DIR (set in .env):
+#   DATA_DIR/movies      -> Plex "Films"
+#   DATA_DIR/shows       -> Plex "Séries TV"
+#   DATA_DIR/incomplete  -> Transmission work in progress
+# Moving everything to a USB disk = copy the folder, change DATA_DIR, `make up`.
+# Paths inside the containers never change, so Plex and Transmission need no reconfiguration.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "2"
+
 services:
   plex:
-    image: linuxserver/plex
+    image: lscr.io/linuxserver/plex:latest
     container_name: plex
     network_mode: host
-    privileged: true
     environment:
-      - PLEX_CLAIM=claim-<your-plex-claim-token>
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
-      - PLEX_PREFERENCE_1="DisableUSBDevices=1"
+      - TZ=Europe/Paris
+      - VERSION=docker
     volumes:
       - ./config/plex:/config
-      - ./transcode:/transcode
-      - ./media:/data
-      - ./downloads/shows:/shows
-      - ./downloads/movies:/movies
-    ports:
-      - "32400:32400/tcp"
-      - "3005:3005/tcp"
-      - "8324:8324/tcp"
-      - "32469:32469/tcp"
-      - "1900:1900/udp"
-      - "32410:32410/udp"
-      - "32412:32412/udp"
-      - "32413:32413/udp"
-      - "32414:32414/udp"
+      - ${DATA_DIR:-./downloads}/movies:/movies
+      - ${DATA_DIR:-./downloads}/shows:/shows
+    # Transcoding scratch space in RAM instead of the SD card.
+    # In Plex: Settings > Transcoder > Transcoder temporary directory = /transcode
+    tmpfs:
+      - /transcode:size=1g
+    logging: *logging
     restart: unless-stopped
 
   transmission:
@@ -35,22 +39,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
-      - TRANSMISSION_WEB_HOME= #optional
-      - USER=transmission_user
-      - PASS=transmission_password
-      - WHITELIST= #optional
-      - PEERPORT= #optional
+      - TZ=Europe/Paris
+      - USER=${TRANSMISSION_USER:?set TRANSMISSION_USER in .env}
+      - PASS=${TRANSMISSION_PASS:?set TRANSMISSION_PASS in .env}
       - HOST_WHITELIST=*
     volumes:
       - ./config/transmission:/config
-      - ./downloads:/downloads
+      # One mount for everything: moves between incomplete/ and movies/ are instant renames, not copies.
+      - ${DATA_DIR:-./downloads}:/downloads
       - ./watch:/watch
-      - ./downloads/movies:/movies
-      - ./downloads/shows:/shows
-
-    ports:
-      - "9091:9091"
-      - "51413:51413"
-      - "51413:51413/udp"
+    logging: *logging
     restart: unless-stopped
