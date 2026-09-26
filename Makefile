@@ -1,4 +1,4 @@
-.PHONY: up down restart update status logs tune
+.PHONY: up down restart update status logs tune fan
 
 up:        ## start Plex + Transmission
 	docker compose up -d
@@ -20,6 +20,10 @@ status:    ## temperature, power, disks, containers, torrents
 logs:      ## follow logs (Ctrl+C to quit)
 	docker compose logs -f --tail=100
 
-tune:      ## one-time system + Transmission tuning
+tune:      ## one-time system + Transmission + Plex tuning
 	sudo ./scripts/tune-pi.sh
 	./scripts/tune-transmission.sh
+	./scripts/tune-plex.sh
+
+fan:       ## install the Argon ONE fan service
+	sudo ./scripts/install-argon.sh
