@@ -32,8 +32,9 @@ s.update({
     "download-dir": "/downloads/movies",
     "incomplete-dir": "/downloads/incomplete",
     "incomplete-dir-enabled": True,
-    # Keep seeding: ratio matters on private trackers.
-    "ratio-limit-enabled": False,
+    # No seeding: a torrent stops as soon as it is complete.
+    "ratio-limit-enabled": True,
+    "ratio-limit": 0,
     "idle-seeding-limit-enabled": False,
 })
 json.dump(s, open(path, "w"), indent=4, sort_keys=True)

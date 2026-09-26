@@ -13,7 +13,7 @@ Plex + Transmission on a Raspberry Pi 4 (Argon ONE case), with Docker Compose.
 2. Open Transmission and drop the file in (or copy it into `watch/`).
    - Movie: nothing to change, it goes to `/downloads/movies`.
    - Series: set the destination to `/downloads/shows` in the add dialog.
-3. When it's done, it shows up in Plex by itself. **Leave it seeding** (ratio).
+3. When it's done, Transmission stops it (no seeding) and it shows up in Plex by itself.
 
 ## Commands (run in `~/mediaserver`)
 
@@ -45,7 +45,7 @@ DATA_DIR/            (./downloads today, /mnt/media once on a USB disk)
 └── incomplete/      downloads in progress
 ```
 
-Transmission seeds directly from `movies/` and `shows/`: one copy of each file, no duplicates.
+Transmission downloads straight into `movies/` and `shows/`: one copy of each file, no duplicates.
 
 ## Moving the media to a USB disk
 
